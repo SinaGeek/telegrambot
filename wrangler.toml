@@ -2,17 +2,17 @@ name = "telegram-worker-bot"
 main = "worker.js"
 workers_dev = true
 preview_urls = true
-compatibility_date = "2025-09-16"
+compatibility_date = "2024-01-01"
 
 [[routes]]
 pattern = "bot.turksafar.ir"
 zone_name = "turksafar.ir"
 custom_domain = true
 
-[site]
-bucket = "./src"
-
-# KV namespace for assets
-[[kv_namespaces]]
+# Static assets configuration
+[assets]
+directory = "./src"
 binding = "ASSETS"
-id = "6bda7d7ee703479b9da8197625119170"
+
+[observability.logs]
+enabled = true
