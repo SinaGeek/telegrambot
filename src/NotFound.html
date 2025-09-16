@@ -84,7 +84,7 @@
 				background: #2575fc;
 				border-radius: 50% 0 50% 50%;
 				opacity: 0;
-				transform: rotate(45deg);
+				transform: rotate(135deg); /* Fixed rotation */
 			}
 
 			.tear1 {
@@ -100,13 +100,13 @@
 			}
 
 			.tear3 {
-				top: 110px;
+				top: 90px;
 				right: 55px;
 				animation: cry 3s infinite 1.5s;
 			}
 
 			.tear4 {
-				top: 120px;
+				top: 100px;
 				right: 45px;
 				animation: cry 3s infinite 2s;
 			}
@@ -160,7 +160,7 @@
 			@keyframes cry {
 				0% {
 					opacity: 0;
-					transform: translateY(0) rotate(45deg) scale(0);
+					transform: translateY(0) rotate(135deg) scale(0);
 				}
 				10% {
 					opacity: 1;
@@ -170,7 +170,7 @@
 				}
 				100% {
 					opacity: 0;
-					transform: translateY(100px) rotate(45deg) scale(1.5);
+					transform: translateY(100px) rotate(135deg) scale(1.5);
 				}
 			}
 

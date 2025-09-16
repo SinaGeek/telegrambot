@@ -30,7 +30,13 @@ export default {
 					const response = await env.ASSETS.fetch(new Request(`${url.origin}/Index.html`));
 					return response;
 				} catch (e) {
-					return new Response('Index page not found', { status: 404 });
+					// Try with lowercase filename
+					try {
+						const response = await env.ASSETS.fetch(new Request(`${url.origin}/index.html`));
+						return response;
+					} catch (e2) {
+						return new Response('Index page not found', { status: 404 });
+					}
 				}
 			}
 
@@ -41,13 +47,22 @@ export default {
 			} catch (e) {
 				// If file not found, serve NotFound.html
 				try {
-					const response = await env.ASSETS.fetch(new Request(`${url.origin}/NotFound.html`));
+					const response = await env.ASSETS.fetch(new Request(`${url.origin}/notfound.html`));
 					return new Response(response.body, {
 						status: 404,
 						headers: { 'Content-Type': 'text/html' },
 					});
 				} catch (e2) {
-					return new Response('Page not found', { status: 404 });
+					// Try with lowercase filename
+					try {
+						const response = await env.ASSETS.fetch(new Request(`${url.origin}/notfound.html`));
+						return new Response(response.body, {
+							status: 404,
+							headers: { 'Content-Type': 'text/html' },
+						});
+					} catch (e3) {
+						return new Response('Page not found', { status: 404 });
+					}
 				}
 			}
 		}
