@@ -1,0 +1,10 @@
+name = "telegram-worker-bot"
+main = "src/worker.js"
+workers_dev = true
+preview_urls = true
+compatibility_date = "2024-01-01"
+
+[[routes]]
+pattern = "bot.turksafar.ir"
+zone_name = "turksafar.ir"
+custom_domain = true
