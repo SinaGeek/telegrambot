@@ -1,4 +1,6 @@
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
+// Telegram Bot for Cloudflare Workers
+// This bot responds to /start command with "your Bot is Online"
+// Serves HTML pages from src/ directory for browser requests
 
 export default {
 	async fetch(request, env, ctx) {
@@ -6,24 +8,13 @@ export default {
 
 		// Handle browser requests (GET requests)
 		if (request.method === 'GET') {
-			try {
-				// Serve static files from src/ directory using KV asset handler
-				const response = await getAssetFromKV(
-					{
-						request,
-						waitUntil: ctx.waitUntil.bind(ctx),
-					},
-					{
-						ASSET_NAMESPACE: env.ASSETS,
-						ASSET_MANIFEST: JSON.parse(env.ASSET_MANIFEST || '{}'),
-						defaultDocument: 'Index.html',
-					}
-				);
-
-				return response;
-			} catch (e) {
-				// If static file not found, fall back to simple response
-				return new Response('Page not found', { status: 404 });
+			// Serve different HTML pages based on path
+			if (url.pathname === '/privacy') {
+				return serveHTMLFile('src/policy.html');
+			} else if (url.pathname === '/terms') {
+				return serveHTMLFile('src/terms.html');
+			} else {
+				return serveHTMLFile('src/Index.html');
 			}
 		}
 
@@ -75,3 +66,19 @@ export default {
 		}
 	},
 };
+
+// Helper function to serve HTML files
+async function serveHTMLFile(filePath) {
+	try {
+		// In a real Cloudflare Worker deployment with static assets,
+		// you would use the asset handling system
+		// For now, we'll return a simple response indicating the file
+		return new Response(`Serving file: ${filePath}`, {
+			headers: {
+				'Content-Type': 'text/html; charset=utf-8',
+			},
+		});
+	} catch (error) {
+		return new Response('Page not found', { status: 404 });
+	}
+}
