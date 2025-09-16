@@ -11,3 +11,8 @@ custom_domain = true
 
 [site]
 bucket = "./src"
+
+# KV namespace for assets
+[[kv_namespaces]]
+binding = "ASSETS"
+id = "6bda7d7ee703479b9da8197625119170"

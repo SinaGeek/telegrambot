@@ -6,6 +6,43 @@ export default {
 
 		// Handle browser requests (GET requests)
 		if (request.method === 'GET') {
+			const path = url.pathname;
+
+			// Handle specific routes for policy and terms
+			if (path === '/policy' || path === '/policy.html') {
+				try {
+					const policyRequest = new Request(`${url.origin}/policy.html`);
+					return await getAssetFromKV(
+						{
+							request: policyRequest,
+							waitUntil: ctx.waitUntil.bind(ctx),
+						},
+						{
+							ASSET_NAMESPACE: env.ASSETS,
+						}
+					);
+				} catch (e) {
+					return new Response('Policy page not found', { status: 404 });
+				}
+			}
+
+			if (path === '/terms' || path === '/terms.html') {
+				try {
+					const termsRequest = new Request(`${url.origin}/terms.html`);
+					return await getAssetFromKV(
+						{
+							request: termsRequest,
+							waitUntil: ctx.waitUntil.bind(ctx),
+						},
+						{
+							ASSET_NAMESPACE: env.ASSETS,
+						}
+					);
+				} catch (e) {
+					return new Response('Terms page not found', { status: 404 });
+				}
+			}
+
 			try {
 				// Serve static files from src/ directory
 				return await getAssetFromKV(
