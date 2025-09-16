@@ -66,15 +66,17 @@
 				right: 45px;
 			}
 
+			/* Changed from happy mouth to sad mouth */
 			.mouth {
 				position: absolute;
 				width: 60px;
 				height: 30px;
 				border-bottom: 8px solid #333;
-				border-radius: 0 0 40px 40px;
+				border-radius: 50% 50% 0 0;
 				bottom: 50px;
 				left: 60px;
-				animation: sad 3s infinite alternate;
+				transform: rotate(180deg);
+				animation: sadMouth 3s infinite alternate;
 			}
 
 			.tear {
@@ -84,7 +86,7 @@
 				background: #2575fc;
 				border-radius: 50% 0 50% 50%;
 				opacity: 0;
-				transform: rotate(135deg); /* Fixed rotation */
+				transform: rotate(-45deg); /* Corrected rotation */
 			}
 
 			.tear1 {
@@ -160,7 +162,7 @@
 			@keyframes cry {
 				0% {
 					opacity: 0;
-					transform: translateY(0) rotate(135deg) scale(0);
+					transform: translateY(0) rotate(-45deg) scale(0);
 				}
 				10% {
 					opacity: 1;
@@ -170,7 +172,7 @@
 				}
 				100% {
 					opacity: 0;
-					transform: translateY(100px) rotate(135deg) scale(1.5);
+					transform: translateY(100px) rotate(-45deg) scale(1.5);
 				}
 			}
 
@@ -184,15 +186,15 @@
 				}
 			}
 
-			@keyframes sad {
+			@keyframes sadMouth {
 				0%,
 				100% {
-					height: 30px;
-					border-radius: 0 0 40px 40px;
+					height: 20px;
+					width: 50px;
 				}
 				50% {
-					height: 20px;
-					border-radius: 0 0 20px 20px;
+					height: 25px;
+					width: 60px;
 				}
 			}
 
