@@ -60,3 +60,5 @@ curl -X POST "https://api.telegram.org/bot7863758983:AAGb05uwffCmuBBxRVI5Tj8bf-8
 ✅ **Terms Page**: Accessible at `/terms` or `/terms.html`
 ✅ **Main Page**: Serves `Index.html` for the root path
 ✅ **Secure**: Bot token stored as a secret, not in code
+
+thanks
