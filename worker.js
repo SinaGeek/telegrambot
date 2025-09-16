@@ -1,6 +1,4 @@
-// Telegram Bot for Cloudflare Workers
-// This bot responds to /start command with "your Bot is Online"
-// Serves HTML pages from src/ directory for browser requests
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 
 export default {
 	async fetch(request, env, ctx) {
@@ -8,13 +6,21 @@ export default {
 
 		// Handle browser requests (GET requests)
 		if (request.method === 'GET') {
-			// Serve different HTML pages based on path
-			if (url.pathname === '/privacy') {
-				return serveHTMLFile('src/policy.html');
-			} else if (url.pathname === '/terms') {
-				return serveHTMLFile('src/terms.html');
-			} else {
-				return serveHTMLFile('src/Index.html');
+			try {
+				// Serve static files from src/ directory
+				return await getAssetFromKV(
+					{
+						request,
+						waitUntil: ctx.waitUntil.bind(ctx),
+					},
+					{
+						ASSET_NAMESPACE: env.ASSETS,
+						defaultDocument: 'Index.html',
+					}
+				);
+			} catch (e) {
+				// If file not found, return 404
+				return new Response('Page not found', { status: 404 });
 			}
 		}
 
@@ -66,19 +72,3 @@ export default {
 		}
 	},
 };
-
-// Helper function to serve HTML files
-async function serveHTMLFile(filePath) {
-	try {
-		// In a real Cloudflare Worker deployment with static assets,
-		// you would use the asset handling system
-		// For now, we'll return a simple response indicating the file
-		return new Response(`Serving file: ${filePath}`, {
-			headers: {
-				'Content-Type': 'text/html; charset=utf-8',
-			},
-		});
-	} catch (error) {
-		return new Response('Page not found', { status: 404 });
-	}
-}
