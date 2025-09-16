@@ -24,18 +24,22 @@ export default {
 				}
 			}
 
+			// Handle root path - serve Index.html
+			if (path === '/' || path === '/index.html') {
+				try {
+					const response = await env.ASSETS.fetch(new Request(`${url.origin}/Index.html`));
+					return response;
+				} catch (e) {
+					return new Response('Index page not found', { status: 404 });
+				}
+			}
+
 			// Serve other files from src/ directory
 			try {
 				const response = await env.ASSETS.fetch(request);
 				return response;
 			} catch (e) {
-				// If file not found, try to serve Index.html
-				try {
-					const response = await env.ASSETS.fetch(new Request(`${url.origin}/Index.html`));
-					return response;
-				} catch (e2) {
-					return new Response('Page not found', { status: 404 });
-				}
+				return new Response('Page not found', { status: 404 });
 			}
 		}
 
