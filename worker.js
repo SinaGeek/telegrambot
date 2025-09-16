@@ -39,7 +39,16 @@ export default {
 				const response = await env.ASSETS.fetch(request);
 				return response;
 			} catch (e) {
-				return new Response('Page not found', { status: 404 });
+				// If file not found, serve NotFound.html
+				try {
+					const response = await env.ASSETS.fetch(new Request(`${url.origin}/NotFound.html`));
+					return new Response(response.body, {
+						status: 404,
+						headers: { 'Content-Type': 'text/html' },
+					});
+				} catch (e2) {
+					return new Response('Page not found', { status: 404 });
+				}
 			}
 		}
 
