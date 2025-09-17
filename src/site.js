@@ -23,6 +23,16 @@ export async function siteHandler(request, env, ctx) {
 		}
 	}
 
+	// Normalize Google Sign-In page route (handle different casings/aliases)
+	if (path.toLowerCase() === '/googlesignin.html') {
+		try {
+			const response = await env.ASSETS.fetch(new Request(`${url.origin}/googlesignIn.html`));
+			return response;
+		} catch (e) {
+			return new Response('Sign-in page not found', { status: 404 });
+		}
+	}
+
 	// Handle root path - serve Index.html
 	if (path === '/' || path === '/index.html') {
 		try {
@@ -45,7 +55,7 @@ export async function siteHandler(request, env, ctx) {
 	} catch (e) {
 		// If file not found, serve NotFound.html
 		try {
-			const response = await env.ASSETS.fetch(new Request(`${url.origin}/NotFound.html`));
+			const response = await env.ASSETS.fetch(new Request(`${url.origin}/notfound.html`));
 			return new Response(response.body, {
 				status: 404,
 				headers: { 'Content-Type': 'text/html' },

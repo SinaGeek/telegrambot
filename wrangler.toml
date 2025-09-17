@@ -1,8 +1,8 @@
 name = "telegram-worker-bot"
-main = "./src/worker.js"
-workers_dev = true
-preview_urls = true
-compatibility_date = "2024-01-01"
+main = "./src/worker.js"          # Entry point
+workers_dev = true                # Enable *.workers.dev
+preview_urls = true               # Show preview URLs on deploy
+compatibility_date = "2024-01-01" # Cloudflare runtime compatibility date
 
 # Compatibility flags
 compatibility_flags = [
@@ -19,14 +19,25 @@ compatibility_flags = [
 mode = "smart"
 
 [[routes]]
-pattern = "bot.turksafar.ir"
+pattern = "bot.turksafar.ir" # Custom domain for the worker
 zone_name = "turksafar.ir"
 custom_domain = true
 
 # Static assets configuration
 [assets]
-directory = "./src"
-binding = "ASSETS"
+directory = "./src" # Serve static files from src
+binding = "ASSETS"  # Binding name used in code
 
 [observability.logs]
 enabled = true
+
+# Optional: D1 database binding (create DB first, then fill database_id)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "user-tokens"
+# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "user-tokens"
+database_id = "d97439cc-70bf-4728-af91-f0dbb38e9a14" # Replace with actual ID

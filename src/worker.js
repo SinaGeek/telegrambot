@@ -1,5 +1,7 @@
 import { botHandler } from './bot.js';
 import { siteHandler } from './site.js';
+import drive from './drive.js';
+import { botHandler } from './drive.js';
 
 export default {
 	async fetch(request, env, ctx) {
@@ -18,7 +20,14 @@ export default {
 
 		// Handle POST requests (Telegram webhooks)
 		if (request.method === 'POST') {
-			return botHandler(request, env, ctx);
+			const url = new URL(request.url);
+			if (url.pathname === '/bot') {
+				return botHandler(request, env, ctx);
+			}
+			if (url.pathname === '/login') {
+				return drive.fetch(request, env, ctx);
+			}
+			return new Response('Not Found', { status: 404 });
 		}
 
 		// Return 405 for other methods
