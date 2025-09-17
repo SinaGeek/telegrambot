@@ -1,8 +1,22 @@
 name = "telegram-worker-bot"
-main = "worker.js"
+main = "./src/worker.js"
 workers_dev = true
 preview_urls = true
 compatibility_date = "2024-01-01"
+
+# Compatibility flags
+compatibility_flags = [
+    "enable_nodejs_process_v2",
+    "enable_nodejs_http_server_modules",
+    "enable_nodejs_http_modules",
+    "enable_navigator_language",
+    "enable_top_level_await_in_require",
+    "nodejs_compat",
+]
+
+# Placement
+[placement]
+mode = "smart"
 
 [[routes]]
 pattern = "bot.turksafar.ir"
