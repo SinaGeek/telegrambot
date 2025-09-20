@@ -262,6 +262,11 @@ Website: <a href="https://bot.turksafar.ir">bot.turksafar.ir</a>
 					);
 					const fileName = message.document ? message.document.file_name : 'photo.jpg';
 
+					// Fetch content buffer first
+					const fileContent = await fetch(`https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${fileInfo.result.file_path}`).then(
+						(res) => res.arrayBuffer()
+					);
+
 					// Notify queued
 					const queued = await sendTelegramMessageWithButtons(env, chatId, 'Request added to the queue!', [
 						[
@@ -281,11 +286,6 @@ Website: <a href="https://bot.turksafar.ir">bot.turksafar.ir</a>
 					)
 						.bind(uploadId, userId, chatId, progressMessageId, fileName, total, 0, 'queued', Date.now(), Date.now())
 						.run();
-
-					// Fetch content buffer
-					const fileContent = await fetch(`https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${fileInfo.result.file_path}`).then(
-						(res) => res.arrayBuffer()
-					);
 
 					// Starting upload
 					await editTelegramMessage(env, progressChatId, progressMessageId, 'Starting to upload...');
