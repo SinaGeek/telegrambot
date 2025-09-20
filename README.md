@@ -1,114 +1,125 @@
-# WOWDrive — Telegram Google Drive Bot (Cloudflare Workers)
+# Telegram → Google Drive Bot (Cloudflare Workers)
 
-Manage your Google Drive directly from Telegram:
+Manage Google Drive right from Telegram:
 
 - Upload by sending files to the bot
 - List files with IDs
 - Rename files
 - Remove files
-- Connect your Drive securely via Google Sign-In
+- Connect your Drive via Google OAuth 2.0 (offline access)
 
-## Setup Instructions
+## Prerequisites
 
-### 1. Create a Telegram Bot
+- Telegram bot token (create via [@BotFather](https://t.me/botfather))
+- Cloudflare account + a Worker (custom domain optional)
+- Google Cloud project with OAuth consent screen configured
+- Node.js and Wrangler CLI
 
-1. Message [@BotFather](https://t.me/botfather) on Telegram
-2. Send `/newbot` command
-3. Follow the instructions to create your bot
-4. Save the bot token you receive
+## Setup
 
-### 2. Deploy to Cloudflare Workers
+### 1) Telegram Bot
 
-1. Install Wrangler CLI:
+1. Message [@BotFather](https://t.me/botfather)
+2. `/newbot` → follow prompts
+3. Save the bot token
+
+### 2) Cloudflare Worker
+
+1. Install Wrangler:
    ```bash
    npm install -g wrangler
    ```
-
-2. Login to Cloudflare:
+2. Login:
    ```bash
    npx wrangler login
    ```
-
-3. Set your bot token as a secret:
+3. Set secrets:
    ```bash
    npx wrangler secret put TELEGRAM_BOT_TOKEN
-   ```
-   Enter your bot token when prompted.
-
-4. Set your Google Client Secret as a secret:
-   ```bash
+   npx wrangler secret put GOOGLE_CLIENT_ID
    npx wrangler secret put GOOGLE_CLIENT_SECRET
    ```
-   Paste your Google Client Secret when prompted.
-
-5. Set your Google Client ID as a secret:
+4. Create D1 (used to store refresh tokens):
    ```bash
-   npx wrangler secret put GOOGLE_CLIENT_ID 
+   npx wrangler d1 create user-tokens
    ```
-   Paste your Google Client ID when prompted.
-
-6. Create your user token database (Cloudflare D1):
-   ```bash
-   npx wrangler d1 create user-tokens 
-   ```
-   Note the returned database_id. Add the binding to wrangler.toml:
-
+   Add the binding to `wrangler.toml`:
    ```toml
    [[d1_databases]]
    binding = "DB"
-   database_name = "user-tokens"
+   database_name = "USER_TOKENS"
    database_id = "<your-database-id>"
    ```
-
-7. Create the table on D1:
+   The worker will auto-create the `user_tokens` table on first login. If you prefer manual creation:
    ```bash
-   npx wrangler d1 execute user-tokens --command="CREATE TABLE user_tokens (user_id TEXT PRIMARY KEY, refresh_token TEXT NOT NULL);"
+   npx wrangler d1 execute USER_TOKENS --command="CREATE TABLE IF NOT EXISTS user_tokens (user_id TEXT PRIMARY KEY, refresh_token TEXT NOT NULL);"
    ```
-   Enter your bot token when prompted.
-
-8. Deploy the worker:
+5. Deploy:
    ```bash
    npx wrangler deploy
    ```
 
-9. Copy the worker URL from the deployment output (e.g., https://bot.turksafar.ir).
+### 3) Google OAuth 2.0
 
-### 3. Set Webhook
+Create an OAuth Client (type: Web application) under Google Cloud → APIs & Services → Credentials.
 
-Set your bot's webhook to point to your Cloudflare Worker:
+- Authorized domains: add your site domain (e.g., `example.com`)
+- Authorized redirect URIs (case/scheme must match exactly):
+  - Production: `https://<YOUR_HOST>/googlesignin.html`
+  - Local dev (Wrangler default):
+    - `http://127.0.0.1:8787/googlesignin.html`
+    - `http://localhost:8787/googlesignin.html`
+  - If using a different dev port (e.g., 8788), add that as well.
+
+Ensure your consent screen is configured and published (Testing/Production). Scope used: `https://www.googleapis.com/auth/drive.file`.
+
+### 4) Telegram Webhook
+
+Set the webhook to your Worker URL (the bot listens on `/bot`).
 
 ```bash
 curl -X POST "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook" \
-     -H "Content-Type: application/json" \
-     -d '{"url": "https://bot.turksafar.ir/bot"}'
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://<YOUR_HOST>/bot"}'
 ```
 
-Replace `<YOUR_BOT_TOKEN>` with your actual bot token and the URL with your worker's URL.
+Replace `<YOUR_HOST>` with your Worker hostname (custom domain or `*.workers.dev`).
 
-### 4. Test Your Bot
+## Usage
 
-1. Find your bot on Telegram (search for the username you created)
-2. Send `/start` command
-3. You should receive "your Bot is Online" as a response
-4. Send `/login` to get the Google sign-in link
-5. Send a document/photo to upload it to Drive
-6. Use `/list`, `/rename <fileId> <newName>`, `/remove <fileId>`
+In Telegram chat with your bot:
+
+- /start — check bot status
+- /help — show help and buttons
+- /login — get Google sign-in link
+- Send a file — uploads to Drive
+- /list — recent Drive files
+- /rename <fileId> <newName> — rename file
+- /remove <fileId> — delete file
+- /privacy — links to Privacy Policy and Terms
+
+After login success, the web page redirects users back to the bot, e.g.: `https://t.me/<YOUR_BOT_USERNAME>?start=auth_done`.
 
 ## Development
 
-To run locally for development:
+Run locally:
 
 ```bash
 npm run dev
 ```
 
-This will start a local development server where you can test your bot.
+Default dev URLs: `http://127.0.0.1:8787` and `http://localhost:8787`.
 
-## Files
+## Pages
 
-- `src/worker.js` — Routes requests (`GET` site, `POST` bot, `/login` if implemented)
-- `src/bot.js` — Telegram bot logic and commands
-- `src/site.js` — Serves static pages
-- `src/GoogleSignIn.html` — Google sign-in page
-- `wrangler.toml` — Cloudflare Workers configuration
-- `package.json` — Node.js dependencies and scripts
+- `Index.html` — homepage
+- `policy.html` — Privacy Policy (served at `/policy`)
+- `terms.html` — Terms of Service (served at `/terms`)
+- `googlesignIn.html` — OAuth redirect landing page (served at `/googlesignin.html`)
+
+## Troubleshooting
+
+- OAuth `redirect_uri_mismatch`: add the exact redirect URI(s) shown above to your OAuth client.
+- Telegram HTML error (e.g., unsupported tags): keep `/help` HTML simple; use newlines (\n).
+- Webhook 404: ensure webhook URL uses `/bot` and deployment is up.
+- Proxy/VPN issues with Wrangler: unset proxy env vars and set `NO_PROXY` for Cloudflare domains, then retry with `--verbose`.

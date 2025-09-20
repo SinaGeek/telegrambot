@@ -34,10 +34,10 @@ enabled = true
 # Optional: D1 database binding (create DB first, then fill database_id)
 # [[d1_databases]]
 # binding = "DB"
-# database_name = "user-tokens"
+# database_name = "USER_TOKENS"
 # database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "user-tokens"
+database_name = "USER_TOKENS"
 database_id = "d97439cc-70bf-4728-af91-f0dbb38e9a14" # Replace with actual ID

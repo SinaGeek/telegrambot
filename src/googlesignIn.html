@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Sign in to google drive</title>
+		<title>Sign in to Google Drive</title>
 		<style>
 			body {
 				font-family: sans-serif;
@@ -48,89 +48,48 @@
 	<body>
 		<div class="container">
 			<h2>Sign in to Google Drive for Telegram Bot</h2>
-
-			<div id="auth-section">
-				<p>Please sign in with Google to connect your Drive to the Telegram bot.</p>
-				<button id="loginBtn">Sign in with Google</button>
-			</div>
-
-			<div id="status"></div>
+			<div id="status">Processing...</div>
 		</div>
-
-		<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 		<script>
 			const statusDiv = document.getElementById('status');
-			const loginBtn = document.getElementById('loginBtn');
-			const authSection = document.getElementById('auth-section');
+			const WORKER_URL = 'https://bot.turksafar.ir';
+			const params = new URLSearchParams(window.location.search);
+			const code = params.get('code');
+			const state = params.get('state');
 
-			// Completed TODO: Replace with your actual credentials and URLs
-			const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'; // Replace with actual
-			const WORKER_URL = 'https://bot.turksafar.ir'; // Replace with your deployed worker URL
-
-			let tokenClient;
-
-			// Get userId from URL (passed from Telegram bot link)
-			const urlParams = new URLSearchParams(window.location.search);
-			const userId = urlParams.get('userId');
-			if (!userId) {
-				statusDiv.textContent = 'Error: No user ID provided. Please access this page from the Telegram bot.';
-				statusDiv.style.color = 'red';
-				loginBtn.disabled = true;
-				return;
-			}
-
-			function initializeGsi() {
-				tokenClient = google.accounts.oauth2.initCodeClient({
-					client_id: GOOGLE_CLIENT_ID,
-					scope: 'https://www.googleapis.com/auth/drive', // Updated for full Drive management
-					ux_mode: 'popup',
-					access_type: 'offline',
-					callback: async (response) => {
-						if (response.code) {
-							console.log('Authorization code received.');
-							statusDiv.textContent = 'Signing in...';
-							statusDiv.style.color = 'blue';
-
-							const formData = new FormData();
-							formData.append('authCode', response.code);
-							formData.append('userId', userId);
-
-							try {
-								const resp = await fetch(`${WORKER_URL}/login`, {
-									method: 'POST',
-									body: formData,
-								});
-								const result = await resp.json();
-								if (resp.ok) {
-									statusDiv.textContent = 'Signed in successfully! You can now return to Telegram.';
-									statusDiv.style.color = 'green';
-									authSection.style.display = 'none';
-								} else {
-									throw new Error(result.error || 'Sign-in failed.');
-								}
-							} catch (error) {
-								statusDiv.textContent = `Error: ${error.message}`;
-								statusDiv.style.color = 'red';
-							}
-						} else {
-							statusDiv.textContent = 'Sign-in failed. Please try again.';
-							statusDiv.style.color = 'red';
-						}
-					},
-				});
-			}
-
-			loginBtn.onclick = () => {
-				if (!tokenClient) {
-					alert('Google client not ready. Please wait a moment and try again.');
-					return;
+			async function postCode(authCode, userId) {
+				try {
+					const formData = new FormData();
+					formData.append('authCode', authCode);
+					formData.append('userId', userId);
+					const resp = await fetch(`${WORKER_URL}/login`, { method: 'POST', body: formData });
+					const result = await resp.json().catch(() => ({}));
+					if (resp.ok) {
+						statusDiv.textContent = 'Signed in successfully! Redirecting to Telegram…';
+						statusDiv.style.color = 'green';
+						// Redirect back to the Telegram bot so the user lands in chat again
+						setTimeout(() => {
+							window.location.href = 'https://t.me/WOWDriveBot?start=auth_done';
+						}, 800);
+					} else {
+						throw new Error(result.error || 'Sign-in failed.');
+					}
+				} catch (e) {
+					statusDiv.textContent = `Error: ${e.message}`;
+					statusDiv.style.color = 'red';
 				}
-				tokenClient.requestCode();
-			};
+			}
 
-			// Load the Google client library
-			window.onload = initializeGsi;
+			(async () => {
+				if (code && state) {
+					statusDiv.textContent = 'Exchanging code...';
+					await postCode(code, state);
+				} else {
+					statusDiv.textContent = 'Missing authorization code. Please return to Telegram and use /login again.';
+					statusDiv.style.color = 'red';
+				}
+			})();
 		</script>
 	</body>
 </html>

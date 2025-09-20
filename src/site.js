@@ -1,11 +1,13 @@
 export async function siteHandler(request, env, ctx) {
-	const url = new URL(request.url);
-	const path = url.pathname;
+    const url = new URL(request.url);
+    const path = url.pathname;
 
 	console.log('Handling GET request for path:', path);
 
-	// Handle specific routes
-	if (path === '/policy' || path === '/policy.html') {
+	// Handle specific routes (case-insensitive, allow trailing slash)
+	const normalizedPath = path.replace(/\/+$/, '').toLowerCase() || '/';
+
+	if (normalizedPath === '/policy' || normalizedPath === '/policy.html') {
 		try {
 			const response = await env.ASSETS.fetch(new Request(`${url.origin}/policy.html`));
 			return response;
@@ -14,7 +16,7 @@ export async function siteHandler(request, env, ctx) {
 		}
 	}
 
-	if (path === '/terms' || path === '/terms.html') {
+	if (normalizedPath === '/terms' || normalizedPath === '/terms.html') {
 		try {
 			const response = await env.ASSETS.fetch(new Request(`${url.origin}/terms.html`));
 			return response;
@@ -24,7 +26,7 @@ export async function siteHandler(request, env, ctx) {
 	}
 
 	// Normalize Google Sign-In page route (handle different casings/aliases)
-	if (path.toLowerCase() === '/googlesignin.html') {
+	if (normalizedPath === '/googlesignin.html') {
 		try {
 			const response = await env.ASSETS.fetch(new Request(`${url.origin}/googlesignIn.html`));
 			return response;
@@ -34,7 +36,7 @@ export async function siteHandler(request, env, ctx) {
 	}
 
 	// Handle root path - serve Index.html
-	if (path === '/' || path === '/index.html') {
+	if (normalizedPath === '/' || normalizedPath === '/index.html') {
 		try {
 			const response = await env.ASSETS.fetch(new Request(`${url.origin}/Index.html`));
 			return response;
